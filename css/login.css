@@ -50,6 +50,7 @@
 .agreedisclaimer > input {
     display: inline-block;
     vertical-align: top;
+    -webkit-appearance: checkbox; /* 2018-10-09 nc13 fix */
 }
 
 /*
@@ -89,7 +90,7 @@
 }
 
 /**
- * Style for the dialog showing the disclaimer text 
+ * Style for the dialog showing the disclaimer text
  */
 #agreedisclaimerDialog {
     text-align: justify;
@@ -97,7 +98,7 @@
 
 
 /**
- * Style for the dialog showing the file errors 
+ * Style for the dialog showing the file errors
  */
 #agreedisclaimerErrorDialog {
     text-align: left;

@@ -35,7 +35,7 @@ class UserHooks {
     private $request;
 
     /**
-     * Creates an UserHooks object 
+     * Creates an UserHooks object
      *
      * @param IUserManager $userManager    UserManager used by the hook
      * @param IRequest     $request        Request from which the hook was
@@ -58,17 +58,22 @@ class UserHooks {
     public function register($appName) {
         $callback = function($user, $password) {
             $app = new Application();
-            $appName = $app->getAppName(); 
+            $appName = $app->getAppName();
             $config = $app->getConfig();
 
             $isDav = strpos($this->request->getScriptName(),
                 '/remote.php') !== false;
+            // 2018-10-09 nc13 fix
+            $isApi = strpos($this->request->getScriptName(),
+                    '/ocs/v') !== false;
             $disclaimerChecked = isset($_POST[$appName. 'Checkbox']);
 
             if (
                 //For dav requests, don't throw the exception; otherwise sync
                 //won't work
                 (!$isDav)
+                // 2018-10-09 nc13 fix
+             && (!$isApi)
                 //If the "agree" checkbox wasn't checked, throw an exception
              && (!$disclaimerChecked)
             ){

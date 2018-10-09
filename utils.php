@@ -10,14 +10,17 @@
 namespace OCA\AgreeDisclaimer;
 use OCP\IL10N;
 
+// 2018-10-09 nc13 fix
+use OCP\L10N\IFactory;
+
 use OCA\AgreeDisclaimer\AppInfo\Application;
 
 
 /**
- * Class with some helper functions 
+ * Class with some helper functions
  */
 class Utils {
-    /** 
+    /**
       * @var array    Language fallbacks. The leftmost language will have
       *               precedency. Please note that all languages will fall back
       *               to its root language by defualt, ie: 'es_CO' will fall
@@ -43,6 +46,10 @@ class Utils {
     /** @var Application Main application object */
     private $app;
 
+    // 2018-10-09 nc13 fix
+    /** @var IFactory Translation service */
+    private $l10nFactory;
+
     /** @var IL10N    Translation service */
     private $l10n;
 
@@ -52,8 +59,12 @@ class Utils {
      * @param Application $app     Main application object
      * @param IL10N       $l10n    Translation service
      */
-    public function __construct(Application $app, IL10N $l10n) {
+    // 2018-10-09 nc13 fix
+    #public function __construct(Application $app, IL10N $l10n) {
+    public function __construct(Application $app, IFactory $l10nFactory, IL10N $l10n) {
         $this->app = $app;
+        // 2018-10-09 nc13 fix
+        $this->l10nFactory = $l10nFactory;
         $this->l10n = $l10n;
     }
 
@@ -120,7 +131,9 @@ class Utils {
 
         //It would be nice this method to be a public method (not static) of
         //L10N
-        $languageCodes = \OC_L10N::findAvailableLanguages();
+        // 2018-10-09 nc13 fix
+        #$languageCodes = \OC_L10N::findAvailableLanguages();
+        $languageCodes = $this->l10nFactory->findAvailableLanguages();
 
         // array of common languages
         $commonlangcodes = array(

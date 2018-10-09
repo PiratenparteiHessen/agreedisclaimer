@@ -13,6 +13,9 @@ use OCP\AppFramework\IAppContainer;
 
 use OCP\AppFramework\Http\TemplateResponse;
 
+// 2018-10-09 nc13 fix
+use OCP\L10N\IFactory;
+
 use OCA\AgreeDisclaimer\Hooks\UserHooks;
 use OCA\AgreeDisclaimer\Controller\SettingsController;
 use OCA\AgreeDisclaimer\Config\Config;
@@ -26,6 +29,10 @@ class Application extends App {
 
     /** @var string    Applications name */
     private $appName;
+
+    // 2018-10-09 nc13 fix
+    /** @var IFactory    Translation service */
+    private $l10nFactory;
 
     /** @var IL10N    Translation service */
     private $l10n;
@@ -49,6 +56,8 @@ class Application extends App {
         parent::__construct($this->appName, $urlParams);
         $container = $this->getContainer();
         $server = $container->getServer();
+        // 2018-10-09 nc13 fix
+        $this->l10nFactory = $server->getL10NFactory();
         $this->l10n = $server->getL10N($this->appName);
 
         $this->config = New Config(
@@ -58,7 +67,16 @@ class Application extends App {
                                 $server->getURLGenerator(),
                                 $server->getLogger()
                         );
-        $this->utils = New Utils($this, $this->l10n);
+        // 2018-10-09 nc13 fix
+        #$this->utils = New Utils($this, $this->l10n);
+        $this->utils = New Utils($this, $this->l10nFactory, $this->l10n);
+    }
+
+    private function setLanguage($language)
+    {
+        $container = $this->getContainer();
+        $server = $container->getServer();
+        $this->l10n = $server->getL10N($this->appName, $language);
     }
 
     /**
@@ -71,7 +89,7 @@ class Application extends App {
     }
 
     /**
-     * Gets the application's name 
+     * Gets the application's name
      *
      * @return string The application's name
      */
@@ -152,7 +170,9 @@ class Application extends App {
 
             //Fix it: No way of getting rid of this static call. There is no
             //class method on OwnCloud that does this
-            if (!\OC_L10N::languageExists($this->appName, $userLang)) {
+            // 2018-10-09 nc13 fix
+            //if (!\OC_L10N::languageExists($this->appName, $userLang)) {
+            if (!$this->l10nFactory->languageExists($this->appName, $userLang)) {
                 //It can be that some language dialects hasn't being translated,
                 //so, a suitable language will be searched. ie: if 'de_CH' isn't
                 //available, then 'de_DE' (formal german) will be used. In case
@@ -170,9 +190,13 @@ class Application extends App {
                 foreach ($langFallbacks as $langCode) {
                     //Fix it: again, no way of getting rid of this static calls;
                     //the ownCloud library doesn't have any other way
-                    if (\OC_L10N::languageExists($this->appName, $langCode)) {
+                    // 2018-10-09 nc13 fix
+                    //if (\OC_L10N::languageExists($this->appName, $langCode)) {
+                    if (!$this->l10nFactory->languageExists($this->appName, $langCode)) {
                         $userLang = $langCode;
-                        \OC_L10N::forceLanguage($userLang);
+                        //\OC_L10N::forceLanguage($userLang);
+                        //$this->setLanguage($userLang);
+                        //$l = new OC_L10N('test', $lang);
                         break;
                     }
                 }
